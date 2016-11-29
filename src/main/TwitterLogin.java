@@ -74,7 +74,7 @@ public class TwitterLogin {
 		post.setHeader("Cookie", getCookies());
 		post.setHeader("Connection", "keep-alive");
 		post.setHeader("Referer",
-				"https://twitter.com/download?logged_out=1&lang=ru");
+				"https://twitter.com/");
 		post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		//post.setEntity(new UrlEncodedFormEntity(postParams));
@@ -97,8 +97,9 @@ public class TwitterLogin {
 		while ((line = rd.readLine()) != null) {
 			result.append(line);
 		}
-
 		System.out.println(result.toString());
+		
+		System.out.println("Cookies : " + collectCookiesresponse(response.getHeaders("set-cookie")));
 
 	}
 
