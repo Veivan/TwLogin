@@ -1,6 +1,9 @@
 package main;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
@@ -20,13 +23,22 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 
 public class TwitterLogin {
-	private String cookies;
-	private HttpClient client = HttpClientBuilder.create().build();
 	private final String USER_AGENT = "Mozilla/5.0";
+	private String cookies;
+	private String twitter_sess;
+	private String guest_id;
+	private String authenticity_token;
+	
+	private String auth_token;
+	private String twid;
+	
+
+	private HttpClient client = HttpClientBuilder.create().build();
 
 	public static void main(String[] args) {
 		String urlsess = "https://twitter.com/sessions";
 		String urlmain = "https://twitter.com/";
+		String urlLogin = "https://twitter.com/login";
 
 		// make sure cookies is turn on
 		CookieHandler.setDefault(new CookieManager());
@@ -34,7 +46,7 @@ public class TwitterLogin {
 		TwitterLogin http = new TwitterLogin();
 
 		try {
-			http.sendPost(urlsess);
+			http.sendPostfirst(urlLogin);
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -59,7 +71,7 @@ public class TwitterLogin {
 		System.out.println("Done");
 	}
 
-	private void sendPost(String url)
+	private void sendPostfirst(String url)
 			throws Exception {
 
 		HttpPost post = new HttpPost(url);
@@ -97,7 +109,14 @@ public class TwitterLogin {
 		while ((line = rd.readLine()) != null) {
 			result.append(line);
 		}
-		System.out.println(result.toString());
+		BufferedWriter bwr = new BufferedWriter(new FileWriter(new File("d:/demo.txt")));      
+        //write contents of StringBuffer to a file
+        bwr.write(result.toString());      
+        //flush the stream
+        bwr.flush();       
+        //close the stream
+        bwr.close();
+		//System.out.println(result.toString());
 		
 		System.out.println("Cookies : " + collectCookiesresponse(response.getHeaders("set-cookie")));
 
