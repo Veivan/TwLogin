@@ -21,6 +21,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class TwitterLogin {
 	private final String USER_AGENT = "Mozilla/5.0";
@@ -28,37 +32,32 @@ public class TwitterLogin {
 	private String twitter_sess;
 	private String guest_id;
 	private String authenticity_token;
-	
+
 	private String auth_token;
 	private String twid;
-	
 
 	private HttpClient client = HttpClientBuilder.create().build();
 
 	public static void main(String[] args) {
+		String urlLogin = "https://twitter.com/login";
 		String urlsess = "https://twitter.com/sessions";
 		String urlmain = "https://twitter.com/";
-		String urlLogin = "https://twitter.com/login";
 
 		// make sure cookies is turn on
 		CookieHandler.setDefault(new CookieManager());
 
 		TwitterLogin http = new TwitterLogin();
 
-		try {
-			http.sendPostfirst(urlLogin);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
 		/*
-		
+		 * try { http.sendPostfirst(urlLogin); } catch (Exception e1) { // TODO
+		 * Auto-generated catch block e1.printStackTrace(); }
+		 */
+
 		String result = "";
 		try {
-			String page = http.GetPageContent(urlsess);
-			List<NameValuePair> postParams = http.getFormParams(page,
-					"login", "pass");
+			String page = http.GetPageContent(urlLogin);
+			
+			List<NameValuePair> postParams = http.getFormParams(page, "user",	"pass");
 			http.sendPost(urlsess, postParams);
 			result = http.GetPageContent(urlmain);
 		} catch (Exception e) {
@@ -66,13 +65,12 @@ public class TwitterLogin {
 			e.printStackTrace();
 		}
 
-		System.out.println(result); */
+		System.out.println(result);
 
 		System.out.println("Done");
 	}
 
-	private void sendPostfirst(String url)
-			throws Exception {
+	private void sendPostfirst(String url) throws Exception {
 
 		HttpPost post = new HttpPost(url);
 
@@ -85,11 +83,10 @@ public class TwitterLogin {
 				"ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4,bg;q=0.2");
 		post.setHeader("Cookie", getCookies());
 		post.setHeader("Connection", "keep-alive");
-		post.setHeader("Referer",
-				"https://twitter.com/");
+		post.setHeader("Referer", "https://twitter.com/");
 		post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-		//post.setEntity(new UrlEncodedFormEntity(postParams));
+		// post.setEntity(new UrlEncodedFormEntity(postParams));
 
 		HttpResponse response = client.execute(post);
 
@@ -97,7 +94,7 @@ public class TwitterLogin {
 
 		System.out.println("\nSending 'POST' request to URL : " + url);
 		System.out.println("Request : " + post.toString());
-//		System.out.println("Post parameters : " + postParams);
+		// System.out.println("Post parameters : " + postParams);
 		System.out.println("Response Code : " + responseCode);
 		System.out.println("Response : " + response.toString());
 
@@ -109,16 +106,18 @@ public class TwitterLogin {
 		while ((line = rd.readLine()) != null) {
 			result.append(line);
 		}
-		BufferedWriter bwr = new BufferedWriter(new FileWriter(new File("d:/demo.txt")));      
-        //write contents of StringBuffer to a file
-        bwr.write(result.toString());      
-        //flush the stream
-        bwr.flush();       
-        //close the stream
-        bwr.close();
-		//System.out.println(result.toString());
-		
-		System.out.println("Cookies : " + collectCookiesresponse(response.getHeaders("set-cookie")));
+		BufferedWriter bwr = new BufferedWriter(new FileWriter(new File(
+				"d:/demo.txt")));
+		// write contents of StringBuffer to a file
+		bwr.write(result.toString());
+		// flush the stream
+		bwr.flush();
+		// close the stream
+		bwr.close();
+		// System.out.println(result.toString());
+
+		System.out.println("Cookies : "
+				+ collectCookiesresponse(response.getHeaders("set-cookie")));
 
 	}
 
@@ -140,7 +139,7 @@ public class TwitterLogin {
 				"https://twitter.com/download?logged_out=1&lang=ru");
 		post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-		post.setEntity(new UrlEncodedFormEntity(postParams));
+		post.setEntity(new UrlEncodedFormEntity(postParams, "UTF-8"));
 
 		HttpResponse response = client.execute(post);
 
@@ -159,7 +158,7 @@ public class TwitterLogin {
 			result.append(line);
 		}
 
-		System.out.println(result.toString());
+		//System.out.println(result.toString());
 
 	}
 
@@ -170,7 +169,8 @@ public class TwitterLogin {
 		request.setHeader("User-Agent", USER_AGENT);
 		request.setHeader("Accept",
 				"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-		request.setHeader("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4,bg;q=0.2");
+		request.setHeader("Accept-Language",
+				"ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4,bg;q=0.2");
 
 		HttpResponse response = client.execute(request);
 		int responseCode = response.getStatusLine().getStatusCode();
@@ -204,29 +204,48 @@ public class TwitterLogin {
 				result.append(";" + header.getValue());
 			}
 		}
-		return result.toString();	
+		return result.toString();
 	}
 
 	public List<NameValuePair> getFormParams(String html, String username,
 			String password) throws UnsupportedEncodingException {
 
 		System.out.println("Extracting form's data...");
+		Document doc = Jsoup.parse(html);
+
+		// Login form id
+		Element loginform = doc.getElementsByClass("LoginForm js-front-signin").first();// getElementById("LoginForm.js-front-signin");
+		Elements inputElements = loginform.getElementsByTag("input");
 
 		List<NameValuePair> paramList = new ArrayList<NameValuePair>();
-		paramList.add(new BasicNameValuePair("session[username_or_email]",
+		
+		for (Element inputElement : inputElements) {
+			String key = inputElement.attr("name");
+			String value = inputElement.attr("value");
+
+			if (key.equals("session[username_or_email]"))
+				value = username;
+			else if (key.equals("session[password]"))
+				value = password;
+			else if (key.equals("remember_me"))
+				value = "0";
+
+			paramList.add(new BasicNameValuePair(key, value));
+
+		}
+		/*paramList.add(new BasicNameValuePair("session[username_or_email]",
 				URLEncoder.encode(username, "UTF-8")));
 		paramList.add(new BasicNameValuePair("session[password]", URLEncoder
 				.encode(password, "UTF-8")));
-		
-		paramList.add(new BasicNameValuePair("remember_me]", "0"));
-		
-		/*return_to_ssl:true
-		
-		scribe_log:
-			redirect_after_login:/
-			authenticity_token:aaac16aa87f3765e27cc55b004b3dde4acc38e6c 
-			*/
-		
+
+		paramList.add(new BasicNameValuePair("remember_me", "0")); */
+
+		/*
+		 * return_to_ssl:true
+		 * 
+		 * scribe_log: redirect_after_login:/
+		 * authenticity_token:aaac16aa87f3765e27cc55b004b3dde4acc38e6c
+		 */
 
 		return paramList;
 	}

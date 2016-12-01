@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="C:/java/httpcomponents-client-4.3.6/lib/httpclient-cache-4.3.6.jar"/>
 	<classpathentry kind="lib" path="C:/java/httpcomponents-client-4.3.6/lib/httpcore-4.3.3.jar"/>
 	<classpathentry kind="lib" path="C:/java/httpcomponents-client-4.3.6/lib/httpmime-4.3.6.jar"/>
+	<classpathentry kind="lib" path="C:/java/jsoup-1.10.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
